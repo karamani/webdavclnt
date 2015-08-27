@@ -1,11 +1,11 @@
 package webdavclnt
 
 import (
+	"io"
+	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
-	"log"
 )
 
 type WebDavClient struct {
@@ -43,7 +43,7 @@ func (clnt *WebDavClient) Get(uri string) error {
 	return nil
 }
 
-func (clnt *WebDavClient) Upload(uri string, data *os.File) error {
+func (clnt *WebDavClient) Upload(uri string, data io.Reader) error {
 
     req, err := http.NewRequest("PUT", clnt.buildConnectionString() + uri, data)
     if err != nil {
