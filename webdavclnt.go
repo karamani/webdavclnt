@@ -54,6 +54,24 @@ func (clnt *WebDavClient) buildRequest(method, uri string, data io.Reader) (*htt
 	return req, nil
 }
 
+func (clnt *WebDavClient) SetPort(port int) *WebDavClient {
+	clnt.Port = port
+	return clnt
+}
+
+func (clnt *WebDavClient) SetLogin(login string) *WebDavClient {
+	clnt.Login = login
+	return clnt
+}
+
+func (clnt *WebDavClient) SetPassword(password string) *WebDavClient {
+	clnt.Password = password
+	return clnt
+}
+
+//
+// Get file from WebDav Storage
+//
 func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 
 	req, err := clnt.buildRequest("GET", uri, nil)
@@ -76,6 +94,9 @@ func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 	return contents, nil
 }
 
+//
+// Upload file into WebDav Storage
+//
 func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 
 	req, err := clnt.buildRequest("PUT", uri, data)
@@ -93,6 +114,9 @@ func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 	return nil
 }
 
+//
+// Delete file from WebDav Storage
+//
 func (clnt *WebDavClient) Delete(uri string) error {
 
 	req, err := clnt.buildRequest("DELETE", uri, nil)
