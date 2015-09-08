@@ -79,8 +79,7 @@ func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 		return nil, err
 	}
 
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +103,7 @@ func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 		return err
 	}
 
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return err
 	}
@@ -124,8 +122,26 @@ func (clnt *WebDavClient) Delete(uri string) error {
 		return err
 	}
 
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
+//
+// Make new directory (collection)
+//
+func (clnt *WebDavClient) MkCol(uri string) error {
+
+	req, err := clnt.buildRequest("MKCOL", uri, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
 		return err
 	}
