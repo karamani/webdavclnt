@@ -149,3 +149,43 @@ func (clnt *WebDavClient) MkCol(uri string) error {
 
 	return nil
 }
+
+//
+// Copy file
+//
+func (clnt *WebDavClient) Copy(uri, destUri string) error {
+
+	req, err := clnt.buildRequest("COPY", uri, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Destination", destUri)
+
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
+//
+// Move file
+//
+func (clnt *WebDavClient) Move(uri, destUri string) error {
+
+	req, err := clnt.buildRequest("MOVE", uri, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Destination", destUri)
+
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
