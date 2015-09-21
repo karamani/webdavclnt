@@ -1,5 +1,5 @@
 //
-// WebDav Client
+// WebDav Http Client
 //
 // Author: Yuri Y. Karamani <y.karamani@gmail.com>
 //
@@ -14,10 +14,11 @@ import (
 )
 
 type WebDavClient struct {
-	Host     string
-	Port     int
-	Login    string
-	Password string
+	Host      string
+	Port      int
+	Login     string
+	Password  string
+	DefFolder string
 }
 
 //
@@ -25,10 +26,11 @@ type WebDavClient struct {
 //
 func NewClient(host string) *WebDavClient {
 	return &WebDavClient{
-		Host:     host,
-		Port:     0,
-		Login:    "",
-		Password: "",
+		Host:      host,
+		Port:      0,
+		Login:     "",
+		Password:  "",
+		DefFolder: "",
 	}
 }
 
@@ -49,7 +51,7 @@ func (clnt *WebDavClient) buildConnectionString() string {
 
 func (clnt *WebDavClient) buildRequest(method, uri string, data io.Reader) (*http.Request, error) {
 
-	req, err := http.NewRequest(method, clnt.buildConnectionString()+uri, data)
+	req, err := http.NewRequest(method, clnt.buildConnectionString()+clnt.DefFolder+uri, data)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +76,11 @@ func (clnt *WebDavClient) SetLogin(login string) *WebDavClient {
 
 func (clnt *WebDavClient) SetPassword(password string) *WebDavClient {
 	clnt.Password = password
+	return clnt
+}
+
+func (clnt *WebDavClient) SetDefFolder(defFolder string) *WebDavClient {
+	clnt.DefFolder = defFolder
 	return clnt
 }
 
@@ -103,7 +110,7 @@ func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 
 //
 // Upload file into WebDav Storage
-//
+//destUri
 func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 
 	req, err := clnt.buildRequest("PUT", uri, data)
@@ -167,7 +174,7 @@ func (clnt *WebDavClient) Copy(uri, destUri string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", clnt.buildConnectionString()+destUri)
+	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destUri)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -187,7 +194,7 @@ func (clnt *WebDavClient) Move(uri, destUri string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", clnt.buildConnectionString()+destUri)
+	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destUri)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
