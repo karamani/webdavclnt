@@ -1,3 +1,8 @@
+//
+// WebDav Client
+//
+// Author: Yuri Y. Karamani <y.karamani@gmail.com>
+//
 package webdavclnt
 
 import (
@@ -15,6 +20,9 @@ type WebDavClient struct {
 	Password string
 }
 
+//
+// WebDav Client constructor
+//
 func NewClient(host string) *WebDavClient {
 	return &WebDavClient{
 		Host:     host,
@@ -159,7 +167,7 @@ func (clnt *WebDavClient) Copy(uri, destUri string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", destUri)
+	req.Header.Set("Destination", clnt.buildConnectionString()+destUri)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -179,7 +187,7 @@ func (clnt *WebDavClient) Move(uri, destUri string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", destUri)
+	req.Header.Set("Destination", clnt.buildConnectionString()+destUri)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
