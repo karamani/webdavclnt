@@ -6,6 +6,8 @@
 package webdavclnt
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -203,4 +205,31 @@ func (clnt *WebDavClient) Move(uri, destUri string) error {
 	defer resp.Body.Close()
 
 	return nil
+}
+
+//
+// Find property
+//
+func (clnt *WebDavClient) PropFind(uri, prop string) ([]byte, error) {
+
+	body := bytes.NewBufferString(
+		fmt.Sprintf(`<?xml version="1.0" encoding="utf-8" ?><propfind xmlns="DAV:"><%s/></propfind>`, prop))
+	req, err := clnt.buildRequest("PROPFIND", uri, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/xml")
+
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	contents, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return contents, nil
 }
