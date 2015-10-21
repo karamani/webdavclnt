@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -216,7 +215,6 @@ func (clnt *WebDavClient) PropFind(uri, prop string) ([]byte, error) {
 	body := bytes.NewBufferString(
 		fmt.Sprintf(`<?xml version="1.0" encoding="utf-8" ?><propfind xmlns="DAV:">%s</propfind>`, prop))
 
-	log.Printf(body.String())
 	req, err := clnt.buildRequest("PROPFIND", uri, body)
 	if err != nil {
 		return nil, err
