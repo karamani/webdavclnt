@@ -237,12 +237,49 @@ func (clnt *WebDavClient) PropFind(uri, prop string) ([]byte, error) {
 }
 
 //
+// Find property
+//
+func (clnt *WebDavClient) PropsFind(uri string, props ...string) ([]byte, error) {
+
+	propstr := "<prop>"
+	for _, eachProp := range props {
+		propstr += fmt.Sprintf("<%s/>", eachProp)
+	}
+	propstr += "</prop>"
+
+	fmt.Println(propstr)
+
+	body := bytes.NewBufferString(
+		fmt.Sprintf(`<?xml version="1.0" encoding="utf-8" ?><propfind xmlns="DAV:">%s</propfind>`, propstr))
+
+	req, err := clnt.buildRequest("PROPFIND", uri, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/xml")
+	req.Header.Set("Depth", "1")
+
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	contents, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return contents, nil
+}
+
+//
 // Get all properties
 //
 func (clnt *WebDavClient) AllPropFind(uri string) ([]byte, error) {
 
 	body := bytes.NewBufferString(
-		`<?xml version="1.0" encoding="utf-8" ?><propfind xmlns="DAV:"><DAV:allprop/></propfind>`)
+		`<?xml version="1.0" encoding="utf-8" ?><propfind xmlns="DAV:"><allprop/></propfind>`)
 
 	req, err := clnt.buildRequest("PROPFIND", uri, body)
 	if err != nil {
