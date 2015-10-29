@@ -114,7 +114,7 @@ func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 
 //
 // Upload file into WebDav Storage
-//destUri
+//
 func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 
 	req, err := clnt.buildRequest("PUT", uri, data)
@@ -272,4 +272,24 @@ func (clnt *WebDavClient) PropFind(uri string, props ...string) (map[string]stri
 //
 func (clnt *WebDavClient) AllPropFind(uri string) (map[string]string, error) {
 	return clnt.getProps(uri, "<allprop/>")
+}
+
+
+//
+// Get names of properties
+//
+func (clnt *WebDavClient) PropNameFind(uri string) ([]string, error) {
+
+	var propNames []string
+
+	props, err := clnt.getProps(uri, "<propname/>")
+	if err != nil {
+		return nil, err
+	}
+
+	for key := range props {
+		propNames = append(propNames, key)
+	}
+
+	return propNames, nil
 }
