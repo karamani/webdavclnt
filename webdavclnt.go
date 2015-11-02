@@ -17,6 +17,8 @@ import (
 	"strings"
 )
 
+type Properties map[string]string
+
 type WebDavClient struct {
 	Host      string
 	Port      int
@@ -209,7 +211,7 @@ func (clnt *WebDavClient) Move(uri, destUri string) error {
 	return nil
 }
 
-func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]string, error) {
+func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]Properties, error) {
 
 	body := bytes.NewBufferString(
 		fmt.Sprintf(`<?xml version="1.0" encoding="utf-8" ?><propfind xmlns="DAV:">%s</propfind>`, propfind))
@@ -238,16 +240,24 @@ func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]string, err
 		return nil, err
 	}
 
-	if obj.Responses == nil || len(obj.Responses) == 0 ||
-		obj.Responses[0].Propstat == nil || obj.Responses[0].Propstat.Prop == nil ||
-		obj.Responses[0].Propstat.Prop.PropList == nil {
-
+	if obj.Responses == nil || len(obj.Responses) == 0 {
 		return nil, errors.New("Unknown xml schema")
 	}
 
-	res := make(map[string]string)
-	for _, prop := range obj.Responses[0].Propstat.Prop.PropList {
-		res[prop.XMLName.Local] = prop.Value
+	res := make(map[string]Properties)
+
+	for _, respTag := range obj.Responses {
+		if respTag.Propstat == nil || respTag.Propstat.Prop == nil ||
+			respTag.Propstat.Prop.PropList == nil {
+
+			return nil, errors.New("Unknown xml schema")
+		}
+
+		p := make(Properties)
+		for _, prop := range respTag.Propstat.Prop.PropList {
+			p[prop.XMLName.Local] = prop.Value
+		}
+		res[respTag.Href] = p
 	}
 
 	return res, nil
@@ -256,7 +266,7 @@ func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]string, err
 //
 // Find properties
 //
-func (clnt *WebDavClient) PropFind(uri string, props ...string) (map[string]string, error) {
+func (clnt *WebDavClient) PropFind(uri string, props ...string) (map[string]Properties, error) {
 
 	propstr := "<prop>"
 	for _, eachProp := range props {
@@ -270,7 +280,7 @@ func (clnt *WebDavClient) PropFind(uri string, props ...string) (map[string]stri
 //
 // Get all properties
 //
-func (clnt *WebDavClient) AllPropFind(uri string) (map[string]string, error) {
+func (clnt *WebDavClient) AllPropFind(uri string) (map[string]Properties, error) {
 	return clnt.getProps(uri, "<allprop/>")
 }
 
@@ -278,18 +288,19 @@ func (clnt *WebDavClient) AllPropFind(uri string) (map[string]string, error) {
 //
 // Get names of properties
 //
-func (clnt *WebDavClient) PropNameFind(uri string) ([]string, error) {
-
-	var propNames []string
+func (clnt *WebDavClient) PropNameFind(uri string) (map[string][]string, error) {
 
 	props, err := clnt.getProps(uri, "<propname/>")
 	if err != nil {
 		return nil, err
 	}
 
-	for key := range props {
-		propNames = append(propNames, key)
+	res := make(map[string][]string)
+	for respkey, resp := range props {
+		for key := range resp {
+			res[respkey] = append(res[respkey], key)
+		}
 	}
 
-	return propNames, nil
+	return res, nil
 }
