@@ -261,7 +261,12 @@ func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]Properties,
 		for _, prop := range respTag.Propstat.Prop.PropList {
 			p[prop.XMLName.Local] = prop.Value
 		}
-		res[respTag.Href] = p
+
+		reskey := respTag.Href
+		if len(clnt.DefFolder) > 0 && strings.Index(respTag.Href, clnt.DefFolder) == 0 {
+			reskey = strings.Replace(reskey, clnt.DefFolder, "", 1)
+		}
+		res[reskey] = p
 	}
 
 	return res, nil
