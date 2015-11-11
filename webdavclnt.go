@@ -106,6 +106,10 @@ func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Error: " + resp.Status)
+	}
+
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
