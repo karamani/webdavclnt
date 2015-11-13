@@ -91,6 +91,14 @@ func (clnt *WebDavClient) SetDefFolder(defFolder string) *WebDavClient {
 }
 
 //
+// Validate response status.
+// Valid statuses: 2xx or 3xx
+//
+func (clnt *WebDavClient) statusIsValid(status int) bool {
+	return status >= http.StatusOK && status < http.StatusBadRequest
+}
+
+//
 // Get file from WebDav Storage
 //
 func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
@@ -106,7 +114,7 @@ func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if !clnt.statusIsValid(resp.StatusCode) {
 		return nil, errors.New("Error: " + resp.Status)
 	}
 
@@ -232,6 +240,10 @@ func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]Properties,
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if !clnt.statusIsValid(resp.StatusCode) {
+		return nil, errors.New("Error: " + resp.Status)
+	}
 
 	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
