@@ -40,9 +40,8 @@ func NewClient(host string) *WebDavClient {
 
 func (clnt *WebDavClient) buildConnectionString() string {
 
-	var connectionString string
+	connectionString := clnt.Host
 
-	connectionString = clnt.Host
 	if !strings.Contains(clnt.Host, "http://") && !strings.Contains(clnt.Host, "https://") {
 		connectionString = "http://" + connectionString
 	}
