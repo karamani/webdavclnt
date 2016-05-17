@@ -1,5 +1,5 @@
 //
-// WebDav Http Client
+// Package webdavclnt contains WebDav Http Client.
 //
 // Author: Yuri Y. Karamani <y.karamani@gmail.com>
 //
@@ -27,9 +27,7 @@ type WebDavClient struct {
 	DefFolder string
 }
 
-//
-// WebDav Client constructor
-//
+// NewClient creates a pointer to an instance of WebDavClient.
 func NewClient(host string) *WebDavClient {
 	return &WebDavClient{
 		Host:      host,
@@ -70,37 +68,41 @@ func (clnt *WebDavClient) buildRequest(method, uri string, data io.Reader) (*htt
 	return req, nil
 }
 
+// SetPort sets the value of a field Port,
+// returns a poiner to an instance WebDavClient.
 func (clnt *WebDavClient) SetPort(port int) *WebDavClient {
 	clnt.Port = port
 	return clnt
 }
 
+// SetLogin sets the value of a field Login,
+// returns a poiner to an instance WebDavClient.
 func (clnt *WebDavClient) SetLogin(login string) *WebDavClient {
 	clnt.Login = login
 	return clnt
 }
 
+// SetPassword sets the value of a field Password,
+// returns a poiner to an instance WebDavClient.
 func (clnt *WebDavClient) SetPassword(password string) *WebDavClient {
 	clnt.Password = password
 	return clnt
 }
 
+// SetDefFolder sets the value of a field DefFolder,
+// returns a poiner to an instance WebDavClient.
 func (clnt *WebDavClient) SetDefFolder(defFolder string) *WebDavClient {
 	clnt.DefFolder = defFolder
 	return clnt
 }
 
-//
-// Validate response status.
+// statusIsValid validates response status.
 // Valid statuses: 2xx or 3xx
-//
 func (clnt *WebDavClient) statusIsValid(status int) bool {
 	return status >= http.StatusOK && status < http.StatusBadRequest
 }
 
-//
-// Get file from WebDav Storage
-//
+// Get gets a file from uri.
 func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 
 	req, err := clnt.buildRequest("GET", uri, nil)
@@ -126,9 +128,7 @@ func (clnt *WebDavClient) Get(uri string) ([]byte, error) {
 	return contents, nil
 }
 
-//
-// Upload file into WebDav Storage
-//
+// Put uploads a file into WebDav storage to the specified uri.
 func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 
 	req, err := clnt.buildRequest("PUT", uri, data)
@@ -145,9 +145,7 @@ func (clnt *WebDavClient) Put(uri string, data io.Reader) error {
 	return nil
 }
 
-//
-// Delete file from WebDav Storage
-//
+// Delete removes a file from WebDav storage to the specified uri.
 func (clnt *WebDavClient) Delete(uri string) error {
 
 	req, err := clnt.buildRequest("DELETE", uri, nil)
@@ -164,9 +162,7 @@ func (clnt *WebDavClient) Delete(uri string) error {
 	return nil
 }
 
-//
-// Make new directory (collection)
-//
+// MkCol makes new directory (collection).
 func (clnt *WebDavClient) MkCol(uri string) error {
 
 	req, err := clnt.buildRequest("MKCOL", uri, nil)
@@ -183,16 +179,14 @@ func (clnt *WebDavClient) MkCol(uri string) error {
 	return nil
 }
 
-//
-// Copy file
-//
-func (clnt *WebDavClient) Copy(uri, destUri string) error {
+// Copy copies a file from uri to destURI.
+func (clnt *WebDavClient) Copy(uri, destURI string) error {
 
 	req, err := clnt.buildRequest("COPY", uri, nil)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destUri)
+	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destURI)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -203,16 +197,14 @@ func (clnt *WebDavClient) Copy(uri, destUri string) error {
 	return nil
 }
 
-//
-// Move file
-//
-func (clnt *WebDavClient) Move(uri, destUri string) error {
+// Move moves a file from uri to destURI.
+func (clnt *WebDavClient) Move(uri, destURI string) error {
 
 	req, err := clnt.buildRequest("MOVE", uri, nil)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destUri)
+	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destURI)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -252,7 +244,7 @@ func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]Properties,
 
 	obj := Multistatus{}
 	err = xml.Unmarshal(contents, &obj)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
@@ -284,9 +276,7 @@ func (clnt *WebDavClient) getProps(uri, propfind string) (map[string]Properties,
 	return res, nil
 }
 
-//
-// Find properties
-//
+// PropFind gets specific properties of file at the specified uri.
 func (clnt *WebDavClient) PropFind(uri string, props ...string) (map[string]Properties, error) {
 
 	propstr := "<prop>"
@@ -298,17 +288,12 @@ func (clnt *WebDavClient) PropFind(uri string, props ...string) (map[string]Prop
 	return clnt.getProps(uri, propstr)
 }
 
-//
-// Get all properties
-//
+// AllPropFind gets all properties of file at the specified uri.
 func (clnt *WebDavClient) AllPropFind(uri string) (map[string]Properties, error) {
 	return clnt.getProps(uri, "<allprop/>")
 }
 
-
-//
-// Get names of properties
-//
+// PropNameFind gets properties names of file at the specified uri.
 func (clnt *WebDavClient) PropNameFind(uri string) (map[string][]string, error) {
 
 	props, err := clnt.getProps(uri, "<propname/>")
