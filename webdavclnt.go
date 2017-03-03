@@ -54,7 +54,7 @@ func (clnt *WebDavClient) buildConnectionString() string {
 
 func (clnt *WebDavClient) buildRequest(method, uri string, data io.Reader) (*http.Request, error) {
 
-	req, err := http.NewRequest(method, clnt.buildConnectionString() + clnt.DefFolder + uri, data)
+	req, err := http.NewRequest(method, clnt.buildConnectionString()+clnt.DefFolder+uri, data)
 	if err != nil {
 		return nil, err
 	}
@@ -310,8 +310,8 @@ func (clnt *WebDavClient) PropNameFind(uri string) (map[string][]string, error) 
 	return res, nil
 }
 
-// IsFileExists checks if the file exists.
-func (clnt *WebDavClient) IsFileExists(uri string) (bool, error) {
+// Exists checks if the file or collection exists.
+func (clnt *WebDavClient) Exists(uri string) (bool, error) {
 
 	req, err := clnt.buildRequest("HEAD", uri, nil)
 	if err != nil {
