@@ -3,8 +3,8 @@ package webdavclnt
 import "encoding/xml"
 
 type PropValue struct {
-	XMLName	xml.Name	 `xml:""`
-	Value	string	 `xml:",chardata"`
+	XMLName xml.Name `xml:""`
+	Value   string   `xml:",chardata"`
 }
 
 type Prop struct {
@@ -16,7 +16,7 @@ type Propstat struct {
 }
 
 type Response struct {
-	Href     string   `xml:"href"`
+	Href     string    `xml:"href"`
 	Propstat *Propstat `xml:"propstat"`
 }
 

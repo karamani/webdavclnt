@@ -185,7 +185,7 @@ func (clnt *WebDavClient) Copy(uri, destURI string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", clnt.buildConnectionString() + clnt.DefFolder + destURI)
+	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destURI)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -203,7 +203,7 @@ func (clnt *WebDavClient) Move(uri, destURI string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", clnt.buildConnectionString() + clnt.DefFolder + destURI)
+	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destURI)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
