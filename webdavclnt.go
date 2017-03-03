@@ -54,7 +54,7 @@ func (clnt *WebDavClient) buildConnectionString() string {
 
 func (clnt *WebDavClient) buildRequest(method, uri string, data io.Reader) (*http.Request, error) {
 
-	req, err := http.NewRequest(method, clnt.buildConnectionString()+clnt.DefFolder+uri, data)
+	req, err := http.NewRequest(method, clnt.buildConnectionString() + clnt.DefFolder + uri, data)
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +185,7 @@ func (clnt *WebDavClient) Copy(uri, destURI string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destURI)
+	req.Header.Set("Destination", clnt.buildConnectionString() + clnt.DefFolder + destURI)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -203,7 +203,7 @@ func (clnt *WebDavClient) Move(uri, destURI string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Destination", clnt.buildConnectionString()+clnt.DefFolder+destURI)
+	req.Header.Set("Destination", clnt.buildConnectionString() + clnt.DefFolder + destURI)
 
 	resp, err := (&http.Client{}).Do(req)
 	if err != nil {
@@ -308,4 +308,21 @@ func (clnt *WebDavClient) PropNameFind(uri string) (map[string][]string, error) 
 	}
 
 	return res, nil
+}
+
+// IsFileExists checks if the file exists.
+func (clnt *WebDavClient) IsFileExists(uri string) (bool, error) {
+
+	req, err := clnt.buildRequest("HEAD", uri, nil)
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	return resp.StatusCode == http.StatusOK, nil
 }
