@@ -17,8 +17,10 @@ import (
 	"strings"
 )
 
+// Properties contains data of WebDAV properties.
 type Properties map[string]string
 
+// WebDavClient contains WebDAV initialization data.
 type WebDavClient struct {
 	Host      string
 	Port      int
